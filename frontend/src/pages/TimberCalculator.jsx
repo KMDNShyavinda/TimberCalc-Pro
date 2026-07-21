@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { parseMixedUnit, mixedUnitToCentimeters } from '../utils/parseMixedUnit'
 import timberService from '../services/timberService'
 import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
+import { exportToCSV } from '../utils/exportUtils'
 
-// Species pricing presets (sample prices in local currency / USD per CFT)
 const SPECIES_PRESETS = [
   { name: 'Teak (Premium)', pricePerCft: 45.00 },
   { name: 'Teak (Standard)', pricePerCft: 35.00 },
@@ -17,6 +18,7 @@ const SPECIES_PRESETS = [
 
 export default function TimberCalculator() {
   const { isAuthenticated } = useAuth()
+  const { t } = useLanguage()
 
   const [diameterInput, setDiameterInput] = useState('')
   const [lengthInput, setLengthInput] = useState('')
@@ -118,13 +120,28 @@ export default function TimberCalculator() {
     window.print()
   }
 
+  const handleExportCSV = () => {
+    if (!result) return
+    const exportData = [{
+      Species: result.species,
+      Method: result.method,
+      Quantity: result.quantity,
+      Single_Volume_CFT: result.single_volume_cft,
+      Total_Volume_CFT: result.total_volume_cft,
+      Total_Volume_M3: result.total_volume_m3,
+      Unit_Price_Per_CFT: `$${result.unitPrice}`,
+      Estimated_Commercial_Value: `$${result.estimated_value}`,
+    }]
+    exportToCSV('Timber_Calculation_Result', exportData)
+  }
+
   return (
     <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-8 print:p-0 print:max-w-none">
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-emerald-800 to-teal-700 text-white p-6 md:p-8 rounded-2xl shadow-lg print:hidden">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Timber Volume & Commercial Value Calculator</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">{t('calculatorTitle')}</h1>
         <p className="text-emerald-100 text-sm md:text-base">
-          Compute wood logs volume instantly using standard cylinder or Hoppus formulas with smart mixed-unit inputs like <span className="font-mono bg-emerald-900/40 px-1.5 py-0.5 rounded">5ft 8in</span>.
+          {t('calculatorDesc')}
         </p>
       </div>
 
@@ -140,22 +157,22 @@ export default function TimberCalculator() {
           {/* Calculation Method */}
           <div className="flex flex-col space-y-2">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-              Calculation Method
+              {t('calcMethod')}
             </label>
             <select
               value={method}
               onChange={(e) => setMethod(e.target.value)}
               className="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition"
             >
-              <option value="standard_cylinder">Standard Cylinder (π × r² × L)</option>
-              <option value="hoppus">Hoppus Formula (Quarter Girth)</option>
+              <option value="standard_cylinder">{t('stdCylinder')}</option>
+              <option value="hoppus">{t('hoppusFormula')}</option>
             </select>
           </div>
 
           {/* Species Preset */}
           <div className="flex flex-col space-y-2">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-              Wood Species Preset
+              {t('speciesPreset')}
             </label>
             <select
               value={selectedSpecies}
@@ -189,7 +206,7 @@ export default function TimberCalculator() {
           {/* Diameter/Girth Input */}
           <div className="flex flex-col space-y-2">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-              Diameter / Girth
+              {t('diameterGirth')}
             </label>
             <input
               type="text"
@@ -198,15 +215,12 @@ export default function TimberCalculator() {
               placeholder='e.g. 42in, 1m 5cm, or 3&apos;6"'
               className="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition"
             />
-            <span className="text-[11px] text-gray-500 dark:text-gray-400">
-              Supports mixed input formats like <span className="font-mono">42in</span> or <span className="font-mono">1m 20cm</span>.
-            </span>
           </div>
 
           {/* Length Input */}
           <div className="flex flex-col space-y-2">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-              Log Length
+              {t('logLength')}
             </label>
             <input
               type="text"
@@ -215,15 +229,12 @@ export default function TimberCalculator() {
               placeholder='e.g. 12ft, 3.5m, or 144in'
               className="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition"
             />
-            <span className="text-[11px] text-gray-500 dark:text-gray-400">
-              Supports mixed inputs like <span className="font-mono">12ft 6in</span>.
-            </span>
           </div>
 
           {/* Unit Price per CFT */}
           <div className="flex flex-col space-y-2">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-              Unit Price (Per CFT)
+              {t('unitPrice')}
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-3 text-gray-500 font-bold">$</span>
@@ -241,7 +252,7 @@ export default function TimberCalculator() {
           {/* Log Quantity */}
           <div className="flex flex-col space-y-2">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-              Log Batch Quantity
+              {t('batchQuantity')}
             </label>
             <input
               type="number"
@@ -264,7 +275,7 @@ export default function TimberCalculator() {
               className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 accent-emerald-600 cursor-pointer"
             />
             <label htmlFor="saveHistory" className="text-xs font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-              Save this calculation log into my account history
+              {t('saveHistory')}
             </label>
           </div>
         )}
@@ -277,7 +288,7 @@ export default function TimberCalculator() {
           {loading ? (
             <span className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
           ) : null}
-          {loading ? 'Calculating Volume & Value...' : 'Calculate Volume & Commercial Value'}
+          {loading ? 'Calculating...' : t('calcBtn')}
         </button>
       </div>
 
@@ -290,24 +301,32 @@ export default function TimberCalculator() {
             </div>
           )}
 
-          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3 gap-2">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-              Calculation Results & Commercial Valuation
+              {t('calcResults')}
             </h2>
-            <button
-              onClick={handlePrintReceipt}
-              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 print:hidden"
-            >
-              🖨️ Print Receipt
-            </button>
+            <div className="flex items-center gap-2 print:hidden">
+              <button
+                onClick={handleExportCSV}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1"
+              >
+                📥 {t('exportCsv')}
+              </button>
+              <button
+                onClick={handlePrintReceipt}
+                className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1"
+              >
+                🖨️ {t('printReceipt')}
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Total Volume CFT */}
             <div className="bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 rounded-xl p-5 text-center">
               <span className="text-[11px] uppercase tracking-wider text-emerald-800 dark:text-emerald-300 font-bold block mb-1">
-                Total Volume (CFT)
+                {t('totVolCft')}
               </span>
               <span className="text-3xl font-extrabold text-emerald-700 dark:text-emerald-400">
                 {result.total_volume_cft} <span className="text-sm font-semibold">ft³</span>
@@ -322,7 +341,7 @@ export default function TimberCalculator() {
             {/* Total Volume m³ */}
             <div className="bg-teal-50/70 dark:bg-teal-950/30 border border-teal-100 dark:border-teal-900/40 rounded-xl p-5 text-center">
               <span className="text-[11px] uppercase tracking-wider text-teal-800 dark:text-teal-300 font-bold block mb-1">
-                Total Volume (m³)
+                {t('totVolM3')}
               </span>
               <span className="text-3xl font-extrabold text-teal-700 dark:text-teal-400">
                 {result.total_volume_m3} <span className="text-sm font-semibold">m³</span>
@@ -337,7 +356,7 @@ export default function TimberCalculator() {
             {/* Estimated Commercial Value */}
             <div className="bg-amber-50/70 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 rounded-xl p-5 text-center">
               <span className="text-[11px] uppercase tracking-wider text-amber-800 dark:text-amber-300 font-bold block mb-1">
-                Est. Commercial Value
+                {t('estValue')}
               </span>
               <span className="text-3xl font-extrabold text-amber-700 dark:text-amber-400">
                 ${result.estimated_value}
@@ -345,16 +364,6 @@ export default function TimberCalculator() {
               <span className="block text-[11px] text-amber-600/80 dark:text-amber-400/80 mt-1">
                 (${result.unitPrice} / ft³)
               </span>
-            </div>
-          </div>
-
-          {/* Breakdown summary table */}
-          <div className="bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/60 rounded-xl p-4 space-y-2 text-xs">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700/50 pb-2">
-              <div><span className="font-semibold text-gray-800 dark:text-gray-200">Species:</span> {result.species}</div>
-              <div><span className="font-semibold text-gray-800 dark:text-gray-200">Formula:</span> {result.method}</div>
-              <div><span className="font-semibold text-gray-800 dark:text-gray-200">Batch Logs:</span> {result.quantity} unit(s)</div>
-              <div><span className="font-semibold text-gray-800 dark:text-gray-200">Rate:</span> ${result.unitPrice}/CFT</div>
             </div>
           </div>
         </div>
