@@ -1,0 +1,22 @@
+# Dependency directories
+/frontend/node_modules/
+/frontend/dist/
+/backend/vendor/
+
+# Environment files
+.env
+/backend/.env
+
+# Databases & SQLite
+/backend/database/*.sqlite
+/backend/database/*.sqlite-journal
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
