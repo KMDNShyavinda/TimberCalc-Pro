@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { LanguageProvider } from './context/LanguageContext'
 import NavBar from './components/NavBar'
+import Footer from './components/Footer'
 import TimberCalculator from './pages/TimberCalculator'
 import MillingEstimator from './pages/MillingEstimator'
 import UnitConverter from './pages/UnitConverter'
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
               </Routes>
             </main>
+            <Footer />
           </div>
         </BrowserRouter>
       </LanguageProvider>
