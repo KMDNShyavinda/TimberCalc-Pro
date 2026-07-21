@@ -1,0 +1,16 @@
+{
+  "short_name": "TimberCalc",
+  "name": "TimberCalc-Pro - Smart Timber & Universal Converter",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#065f46",
+  "background_color": "#111827",
+  "description": "Smart Timber Volume Calculator, Commercial Value Estimator & Universal Unit Converter for forestry workers and sawmills."
+}

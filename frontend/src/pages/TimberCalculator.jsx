@@ -4,6 +4,7 @@ import timberService from '../services/timberService'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import { exportToCSV } from '../utils/exportUtils'
+import LogVisualizer from '../components/LogVisualizer'
 
 const SPECIES_PRESETS = [
   { name: 'Teak (Premium)', pricePerCft: 45.00 },
@@ -16,12 +17,15 @@ const SPECIES_PRESETS = [
   { name: 'Custom / Other', pricePerCft: 0 },
 ]
 
+const QUICK_LENGTHS = ['8ft', '10ft', '12ft', '14ft', '16ft']
+const QUICK_GIRTHS = ['24in', '36in', '42in', '48in', '60in']
+
 export default function TimberCalculator() {
   const { isAuthenticated } = useAuth()
   const { t } = useLanguage()
 
-  const [diameterInput, setDiameterInput] = useState('')
-  const [lengthInput, setLengthInput] = useState('')
+  const [diameterInput, setDiameterInput] = useState('42in')
+  const [lengthInput, setLengthInput] = useState('12ft')
   const [method, setMethod] = useState('standard_cylinder')
   const [selectedSpecies, setSelectedSpecies] = useState('Teak (Standard)')
   const [customSpeciesName, setCustomSpeciesName] = useState('')
@@ -136,7 +140,7 @@ export default function TimberCalculator() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-8 print:p-0 print:max-w-none">
+    <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-8 print:p-0 print:max-w-none">
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-emerald-800 to-teal-700 text-white p-6 md:p-8 rounded-2xl shadow-lg print:hidden">
         <h1 className="text-3xl font-bold tracking-tight mb-2">{t('calculatorTitle')}</h1>
@@ -203,7 +207,7 @@ export default function TimberCalculator() {
             </div>
           )}
 
-          {/* Diameter/Girth Input */}
+          {/* Diameter/Girth Input + Shortcuts */}
           <div className="flex flex-col space-y-2">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
               {t('diameterGirth')}
@@ -215,9 +219,23 @@ export default function TimberCalculator() {
               placeholder='e.g. 42in, 1m 5cm, or 3&apos;6"'
               className="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition"
             />
+            {/* Quick Shortcuts */}
+            <div className="flex items-center gap-1.5 flex-wrap pt-1">
+              <span className="text-[10px] text-gray-400 font-semibold uppercase">Presets:</span>
+              {QUICK_GIRTHS.map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setDiameterInput(g)}
+                  className="text-[10px] bg-gray-100 hover:bg-emerald-100 dark:bg-gray-700 dark:hover:bg-emerald-900 text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-300 px-2 py-0.5 rounded font-mono transition"
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Length Input */}
+          {/* Length Input + Shortcuts */}
           <div className="flex flex-col space-y-2">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
               {t('logLength')}
@@ -229,6 +247,20 @@ export default function TimberCalculator() {
               placeholder='e.g. 12ft, 3.5m, or 144in'
               className="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition"
             />
+            {/* Quick Shortcuts */}
+            <div className="flex items-center gap-1.5 flex-wrap pt-1">
+              <span className="text-[10px] text-gray-400 font-semibold uppercase">Presets:</span>
+              {QUICK_LENGTHS.map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => setLengthInput(l)}
+                  className="text-[10px] bg-gray-100 hover:bg-emerald-100 dark:bg-gray-700 dark:hover:bg-emerald-900 text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-300 px-2 py-0.5 rounded font-mono transition"
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Unit Price per CFT */}
@@ -291,6 +323,15 @@ export default function TimberCalculator() {
           {loading ? 'Calculating...' : t('calcBtn')}
         </button>
       </div>
+
+      {/* Log Graphic SVG Diagram Visualizer */}
+      <LogVisualizer
+        diameterInput={diameterInput}
+        lengthInput={lengthInput}
+        species={selectedSpecies}
+        method={method}
+        volumeCft={result?.total_volume_cft}
+      />
 
       {/* Results Display */}
       {result && (
